@@ -1,9 +1,17 @@
-#!/usr/bin/env bash
+#!/bin/sh
+# shellcheck shell=dash
 # gcloud-docker-network installer
 
 set -e
 
-VERSION="1.0.2"
+# Some shells don't have `local`. Alias it to `typeset` if needed.
+has_local() {
+    # shellcheck disable=SC2034
+    local _has_local
+}
+has_local 2>/dev/null || alias local=typeset
+
+VERSION="1.0.0"
 INSTALL_DIR="/usr/local/bin"
 BINARY_NAME="gcloud-docker-network"
 INSTALL_PATH="$INSTALL_DIR/$BINARY_NAME"
@@ -20,79 +28,98 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Helper functions
+check_cmd() {
+    command -v "$1" > /dev/null 2>&1
+}
+
+need_cmd() {
+    if ! check_cmd "$1"; then
+        printf "${RED}❌ Error: need '%s' (command not found)${NC}\n" "$1" >&2
+        exit 1
+    fi
+}
+
+say() {
+    printf "%s\n" "$1"
+}
+
+err() {
+    printf "${RED}ERROR${NC}: %s\n" "$1" >&2
+    exit 1
+}
+
 # Check if running as root for installation
 check_root() {
-    if [ "$EUID" -ne 0 ] && [ ! -w "$INSTALL_DIR" ]; then
-        echo -e "${YELLOW}⚠️  This script requires sudo privileges to install to $INSTALL_DIR${NC}"
-        echo -e "${BLUE}💡 Re-running with sudo...${NC}"
+    if [ "$(id -u)" -ne 0 ] && [ ! -w "$INSTALL_DIR" ]; then
+        say "$(printf "${YELLOW}⚠️  This script requires sudo privileges to install to $INSTALL_DIR${NC}")"
+        say "$(printf "${BLUE}💡 Re-running with sudo...${NC}")"
         exec sudo "$0" "$@"
     fi
 }
 
 # Uninstall function
 uninstall() {
-    echo -e "${CYAN}Uninstalling gcloud-docker-network...${NC}"
+    say "$(printf "${CYAN}Uninstalling gcloud-docker-network...${NC}")"
 
     if [ -f "$INSTALL_PATH" ]; then
         rm -f "$INSTALL_PATH"
-        echo -e "${GREEN}✅ Successfully uninstalled gcloud-docker-network${NC}"
-        echo -e "${BLUE}   Removed: $INSTALL_PATH${NC}"
+        say "$(printf "${GREEN}✅ Successfully uninstalled gcloud-docker-network${NC}")"
+        say "$(printf "${BLUE}   Removed: $INSTALL_PATH${NC}")"
     else
-        echo -e "${YELLOW}⚠️  gcloud-docker-network is not installed${NC}"
+        say "$(printf "${YELLOW}⚠️  gcloud-docker-network is not installed${NC}")"
         exit 1
     fi
 }
 
 # Install function
 install() {
-    echo -e "${CYAN}Installing gcloud-docker-network v${VERSION}...${NC}"
+    say "$(printf "${CYAN}Installing gcloud-docker-network v${VERSION}...${NC}")"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    # Check if curl is installed
-    if ! command -v curl &> /dev/null; then
-        echo -e "${RED}❌ Error: curl is required but not installed${NC}"
-        echo -e "${BLUE}💡 Install curl first: sudo apt-get install curl${NC}"
-        exit 1
-    fi
+    # Check required commands
+    need_cmd curl
+    need_cmd mktemp
+    need_cmd chmod
+    need_cmd mkdir
+    need_cmd rm
+    need_cmd cp
 
     # Create temp directory
+    local TMP_DIR
     TMP_DIR=$(mktemp -d)
     trap 'rm -rf "$TMP_DIR"' EXIT
 
     # Download the script
-    echo -e "${BLUE}📥 Downloading script...${NC}"
+    say "$(printf "${BLUE}📥 Downloading script...${NC}")"
     if ! curl -fsSL "$SCRIPT_URL" -o "$TMP_DIR/run.sh"; then
-        echo -e "${RED}❌ Failed to download script from $SCRIPT_URL${NC}"
-        echo -e "${YELLOW}💡 Make sure the repository URL is correct${NC}"
-        exit 1
+        err "Failed to download script from $SCRIPT_URL"
     fi
 
     # Verify download
     if [ ! -s "$TMP_DIR/run.sh" ]; then
-        echo -e "${RED}❌ Downloaded file is empty${NC}"
-        exit 1
+        err "Downloaded file is empty"
     fi
 
     # Install to target directory
-    echo -e "${BLUE}📦 Installing to $INSTALL_PATH...${NC}"
+    say "$(printf "${BLUE}📦 Installing to $INSTALL_PATH...${NC}")"
     cp "$TMP_DIR/run.sh" "$INSTALL_PATH"
     chmod +x "$INSTALL_PATH"
 
     # Verify installation
     if [ -x "$INSTALL_PATH" ]; then
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo -e "${GREEN}✅ Successfully installed gcloud-docker-network!${NC}"
+        say "$(printf "${GREEN}✅ Successfully installed gcloud-docker-network!${NC}")"
         echo ""
-        echo -e "${YELLOW}Quick Start:${NC}"
-        echo -e "  ${CYAN}gcloud-docker-network check 8080${NC}       # Check port status"
-        echo -e "  ${CYAN}gcloud-docker-network add 8080${NC}         # Add port rule"
-        echo -e "  ${CYAN}gcloud-docker-network list${NC}             # List Docker rules"
-        echo -e "  ${CYAN}gcloud-docker-network help${NC}             # Show help"
+        say "$(printf "${YELLOW}Quick Start:${NC}")"
+        printf "  ${CYAN}gcloud-docker-network check 8080${NC}       # Check port status\n"
+        printf "  ${CYAN}gcloud-docker-network add 8080${NC}         # Add port rule\n"
+        printf "  ${CYAN}gcloud-docker-network list${NC}             # List Docker rules\n"
+        printf "  ${CYAN}gcloud-docker-network help${NC}             # Show help\n"
         echo ""
-        echo -e "${BLUE}💡 Run 'gcloud-docker-network help' for more information${NC}"
+        say "$(printf "${BLUE}💡 Run 'gcloud-docker-network help' for more information${NC}")"
     else
-        echo -e "${RED}❌ Installation failed${NC}"
-        exit 1
+        err "Installation failed"
     fi
 }
 
