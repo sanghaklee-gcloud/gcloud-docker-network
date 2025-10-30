@@ -3,15 +3,15 @@
 [![Shellcheck](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/shellcheck.yml)
 [![Test Installation](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/test-install.yml/badge.svg)](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/test-install.yml)
 
-GCloud 환경에서 Docker 컨테이너의 호스트 접근을 위한 iptables 관리 도구
+ Docker 컨테이너의 호스트 접근을 위한 iptables 관리 도구
 
 ## 설치
-
 ```bash
-# 설치
 curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master/install.sh | sh
+```
 
-# 삭제
+### 삭제
+```bash
 curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master/install.sh | sh -s -- --uninstall
 ```
 
