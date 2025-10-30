@@ -33,12 +33,12 @@ jobs:
 
             ### Quick Install
             ```bash
-            curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh
+            curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master/install.sh | sh
             ```
 
             ### Uninstall
             ```bash
-            curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh -s -- --uninstall
+            curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master/install.sh | sh -s -- --uninstall
             ```
 
             ### What's Changed

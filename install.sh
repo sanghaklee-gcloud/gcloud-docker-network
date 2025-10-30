@@ -9,7 +9,7 @@ BINARY_NAME="gcloud-docker-network"
 INSTALL_PATH="$INSTALL_DIR/$BINARY_NAME"
 
 # GitHub repository URL (update this with your actual repository)
-REPO_URL="https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main"
+REPO_URL="https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master"
 SCRIPT_URL="$REPO_URL/run.sh"
 
 # Colors

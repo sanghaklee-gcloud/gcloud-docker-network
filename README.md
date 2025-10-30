@@ -9,10 +9,10 @@ GCloud 환경에서 Docker 컨테이너의 호스트 접근을 위한 iptables �
 
 ```bash
 # 설치
-curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh
+curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master/install.sh | sh
 
 # 삭제
-curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh -s -- --uninstall
+curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/master/install.sh | sh -s -- --uninstall
 ```
 
 ## 사용법
