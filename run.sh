@@ -45,11 +45,11 @@ validate_ports() {
 
     for port in "${PORTS[@]}"; do
         if ! [[ "$port" =~ ^[0-9]+$ ]]; then
-            echo -e "${RED}❌ Error: 잘못된 포트 번호 '$port' (숫자만 가능)${NC}"
+            echo -e "${RED}❌ Error: 잘못된 포트 번호 $port - 숫자만 가능${NC}"
             exit 1
         fi
         if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-            echo -e "${RED}❌ Error: 포트 번호 범위 초과 '$port' (1-65535)${NC}"
+            echo -e "${RED}❌ Error: 포트 번호 범위 초과 $port - 1~65535${NC}"
             exit 1
         fi
     done
@@ -76,7 +76,7 @@ check_port_exists() {
     fi
 }
 
-# iptables 출력 (헤더 포함)
+# iptables 출력 - 헤더 포함
 show_iptables_with_header() {
     local CHAIN="INPUT"
     local FILTER="$1"
@@ -90,7 +90,7 @@ show_iptables_with_header() {
 
     # 필터링된 내용 출력
     if [ -n "$FILTER" ]; then
-        echo "$FULL_OUTPUT" | tail -n +3 | grep -E "$FILTER" || echo "  (Docker 관련 규칙 없음)"
+        echo "$FULL_OUTPUT" | tail -n +3 | grep -E "$FILTER" || echo "  Docker 관련 규칙 없음"
     else
         echo "$FULL_OUTPUT" | tail -n +3
     fi
@@ -153,7 +153,7 @@ case "$1" in
         for PORT in "${PORTS[@]}"; do
             # 이미 존재하는지 확인 (커멘트 제외)
             if check_port_exists "$PORT"; then
-                echo -e "${YELLOW}⚠️  Port $PORT already exists (skipping)${NC}"
+                echo -e "${YELLOW}⚠️  Port $PORT already exists - skipping${NC}"
                 EXISTING_RULE=$(sudo iptables -nvL INPUT --line-numbers | grep "br\+" | grep "dpt:$PORT" | head -1)
                 echo "   └→ Existing: $EXISTING_RULE"
                 continue
@@ -242,9 +242,9 @@ case "$1" in
         # INPUT 정책 확인
         POLICY=$(sudo iptables -nvL INPUT | head -1 | grep -oP 'policy \K\w+')
         if [ "$POLICY" = "DROP" ]; then
-            echo -e "  ${YELLOW}⚠️  INPUT Chain Policy: DROP (제한적)${NC}"
+            echo -e "  ${YELLOW}⚠️  INPUT Chain Policy: DROP - 제한적${NC}"
         else
-            echo -e "  ${GREEN}✓ INPUT Chain Policy: ACCEPT (허용)${NC}"
+            echo -e "  ${GREEN}✓ INPUT Chain Policy: ACCEPT - 허용${NC}"
         fi
         echo ""
 
@@ -293,17 +293,17 @@ case "$1" in
         echo "  gcloud-docker-network <command> [options] <ports...>"
         echo ""
         echo -e "${YELLOW}Commands:${NC}"
-        echo "  list              Docker 관련 규칙 목록 (헤더 포함)"
+        echo "  list              Docker 관련 규칙 목록 - 헤더 포함"
         echo "  show-all          전체 INPUT 규칙 보기"
-        echo "  check <ports...>  포트 상태 확인 (포트 필수)"
-        echo "  add <ports...>    포트 규칙 추가 (포트 필수) - 중복 체크"
-        echo "  del <ports...>    포트 규칙 삭제 (포트 필수)"
+        echo "  check <ports...>  포트 상태 확인 - 포트 필수"
+        echo "  add <ports...>    포트 규칙 추가 - 포트 필수 - 중복 체크"
+        echo "  del <ports...>    포트 규칙 삭제 - 포트 필수"
         echo "  version           버전 정보"
         echo "  help              이 도움말"
         echo ""
         echo -e "${YELLOW}Options:${NC}"
         echo "  --dry-run         실제 실행하지 않고 명령어만 출력"
-        echo "  -f, --force       확인 메시지 무시 (add 명령어에서만 사용)"
+        echo "  -f, --force       확인 메시지 무시 - add 명령어에서만 사용"
         echo ""
         echo -e "${YELLOW}Notes:${NC}"
         echo "  - 포트 번호는 1-65535 범위의 숫자만 가능합니다"
