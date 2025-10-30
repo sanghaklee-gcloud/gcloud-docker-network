@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.version.outputs.tag }}
+          body: |
+            ## gcloud-docker-network ${{ steps.version.outputs.tag }}
+
+            ### Quick Install
+            ```bash
+            curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh
+            ```
+
+            ### Uninstall
+            ```bash
+            curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh -s -- --uninstall
+            ```
+
+            ### What's Changed
+            See commit history for details.
+
+          files: |
+            run.sh
+            install.sh
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

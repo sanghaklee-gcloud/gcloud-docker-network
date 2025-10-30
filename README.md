@@ -1,229 +1,81 @@
 # gcloud-docker-network
 
-Docker iptables management tool for GCloud environments. Easily manage iptables rules to allow host access to Docker containers through Docker bridge interfaces.
+[![Shellcheck](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/shellcheck.yml)
+[![Test Installation](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/test-install.yml/badge.svg)](https://github.com/sanghaklee-gcloud/gcloud-docker-network/actions/workflows/test-install.yml)
 
-## Features
+GCloud 환경에서 Docker 컨테이너의 호스트 접근을 위한 iptables 관리 도구
 
-- ✅ Add/remove iptables rules for Docker container access
-- ✅ Check port rule status
-- ✅ Duplicate rule detection
-- ✅ INPUT policy checking with confirmation prompts
-- ✅ Dry-run mode for safe testing
-- ✅ List Docker-related iptables rules
-- ✅ Colored output for better readability
-
-## Installation
-
-### Quick Install (Recommended)
+## 설치
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/YOUR_USERNAME/gcloud-docker-network/main/install.sh | sh
+# 설치
+curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh
+
+# 삭제
+curl -LsSf https://raw.githubusercontent.com/sanghaklee-gcloud/gcloud-docker-network/main/install.sh | sh -s -- --uninstall
 ```
 
-### Manual Installation
+## 사용법
 
 ```bash
-# Download and install
-curl -LsSf https://raw.githubusercontent.com/YOUR_USERNAME/gcloud-docker-network/main/run.sh -o /usr/local/bin/gcloud-docker-network
-chmod +x /usr/local/bin/gcloud-docker-network
-```
-
-### Uninstall
-
-```bash
-curl -LsSf https://raw.githubusercontent.com/YOUR_USERNAME/gcloud-docker-network/main/install.sh | sh -s -- --uninstall
-```
-
-## Usage
-
-### Basic Syntax
-
-```bash
-gcloud-docker-network <command> [options] <ports...>
-```
-
-### Commands
-
-#### List Docker Rules
-```bash
-gcloud-docker-network list
-```
-Display Docker-related iptables rules with headers.
-
-#### Check Port Status
-```bash
-gcloud-docker-network check 8080 3000
-```
-Check if specified ports are allowed through iptables.
-
-#### Add Port Rules
-```bash
-gcloud-docker-network add 8080 3000 5000
-```
-Add iptables rules to allow traffic on specified ports.
-
-**Options:**
-- `--dry-run`: Show what would be done without executing
-- `-f, --force`: Skip INPUT policy confirmation prompt
-
-**Examples:**
-```bash
-# Add port with confirmation
-gcloud-docker-network add 8080
-
-# Add port without confirmation
-gcloud-docker-network add -f 8080
-
-# Test what would happen (dry-run)
-gcloud-docker-network add --dry-run 8080 3000
-
-# Combine options
-gcloud-docker-network add --dry-run -f 8080 3000
-```
-
-#### Delete Port Rules
-```bash
-gcloud-docker-network del 8080
-```
-Remove iptables rules for specified ports.
-
-**Options:**
-- `--dry-run`: Show what would be deleted without executing
-
-**Examples:**
-```bash
-# Delete port rule
-gcloud-docker-network del 8080
-
-# Test deletion (dry-run)
-gcloud-docker-network del --dry-run 8080
-```
-
-#### Show All Rules
-```bash
-gcloud-docker-network show-all
-```
-Display all INPUT chain rules with statistics.
-
-#### Help
-```bash
-gcloud-docker-network help
-```
-Show detailed help message.
-
-#### Version
-```bash
-gcloud-docker-network version
-```
-Display version information.
-
-## Options
-
-- `--dry-run` - Show commands without executing (available for add/del/check)
-- `-f, --force` - Skip INPUT policy confirmation prompt (add command only)
-
-## Important Notes
-
-1. **Port Requirements**
-   - Ports are required arguments (no default values)
-   - Must be numbers between 1-65535
-
-2. **INPUT Policy Check**
-   - The `add` command checks if INPUT chain policy is DROP
-   - If INPUT policy is not DROP, a confirmation prompt is shown
-   - Use `-f` to skip the confirmation prompt
-   - Dry-run mode automatically skips confirmation
-
-3. **Command Order**
-   ```bash
-   command [options] ports...
-   ```
-   Options must come before port numbers.
-
-4. **Rule Pattern**
-   The tool manages iptables rules with this pattern:
-   ```bash
-   iptables -A INPUT -i br+ -p tcp --dport PORT -m comment --comment "Docker-Host access rule DATE" -j ACCEPT
-   ```
-
-5. **Persistence**
-   After making changes, save them permanently:
-   ```bash
-   sudo iptables-save > /etc/iptables/rules.v4
-   ```
-
-## Examples
-
-### Common Workflows
-
-```bash
-# Check if ports are allowed
-gcloud-docker-network check 8080 3000
-
-# Add multiple ports
+# 포트 규칙 추가
 gcloud-docker-network add 8080 3000 5000
 
-# Test before adding (recommended)
-gcloud-docker-network add --dry-run 8080
-
-# Force add without confirmation
-gcloud-docker-network add -f 8080
-
-# Remove port rules
-gcloud-docker-network del 8080
-
-# List all Docker-related rules
-gcloud-docker-network list
-
-# Show all iptables rules
-gcloud-docker-network show-all
-```
-
-### Complete Example
-
-```bash
-# 1. Check current status
+# 포트 상태 확인
 gcloud-docker-network check 8080
 
-# 2. Test adding the rule
-gcloud-docker-network add --dry-run 8080
-
-# 3. Actually add the rule
-gcloud-docker-network add 8080
-
-# 4. Verify it was added
+# Docker 관련 규칙 목록
 gcloud-docker-network list
 
-# 5. Save permanently
+# 포트 규칙 삭제
+gcloud-docker-network del 8080
+
+# 전체 INPUT 규칙 보기
+gcloud-docker-network show-all
+
+# 도움말
+gcloud-docker-network help
+```
+
+## 옵션
+
+- `--dry-run` - 실행하지 않고 명령만 확인 (add/del/check 명령)
+- `-f, --force` - INPUT 정책 확인 프롬프트 생략 (add 명령만)
+
+## 예시
+
+```bash
+# 테스트 후 추가 (권장)
+gcloud-docker-network add --dry-run 8080
+gcloud-docker-network add 8080
+
+# 확인 없이 강제 추가
+gcloud-docker-network add -f 8080
+
+# 규칙 확인 및 삭제
+gcloud-docker-network list
+gcloud-docker-network del 8080
+
+# 영구 저장
 sudo iptables-save > /etc/iptables/rules.v4
 ```
 
-## Requirements
+## 규칙 패턴
 
-- Linux environment
-- `sudo` access for iptables commands
-- Docker installed and running
-- Standard utilities: `iptables`, `grep`, `awk`, `head`, `tail`, `wc`
+```bash
+iptables -A INPUT -i br+ -p tcp --dport PORT -m comment --comment "Docker-Host access rule DATE" -j ACCEPT
+```
 
-## Use Case
+## 주의사항
 
-This tool is designed for GCloud environments where:
-- INPUT chain policy is set to DROP for security
-- Docker containers need to be accessed from the host
-- You need to manage iptables rules for Docker bridge interfaces (`br+`)
+- 포트는 필수 인자 (1-65535 범위)
+- INPUT 체인 정책이 DROP이 아니면 확인 프롬프트 표시
+- 옵션은 포트 번호 앞에 위치: `command [options] ports...`
+- 변경사항은 `iptables-save`로 영구 저장 필요
 
-## License
+## 요구사항
 
-MIT License
-
-## Version
-
-Current version: 1.0.2
-
-## Contributing
-
-Issues and pull requests are welcome!
-
-## Repository
-
-https://github.com/YOUR_USERNAME/gcloud-docker-network
+- Linux 환경
+- sudo 권한
+- Docker 설치
+- 기본 유틸리티: iptables, grep, awk
