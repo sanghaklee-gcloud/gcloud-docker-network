@@ -57,7 +57,8 @@ validate_ports() {
 
 # INPUT chain policy 확인
 check_input_policy() {
-    local POLICY=$(sudo iptables -nvL INPUT | head -1 | grep -oP 'policy \K\w+')
+    local POLICY
+    POLICY=$(sudo iptables -nvL INPUT | head -1 | grep -oP 'policy \K\w+')
     if [ "$POLICY" != "DROP" ]; then
         return 1  # DROP이 아님
     fi
@@ -79,13 +80,14 @@ check_port_exists() {
 show_iptables_with_header() {
     local CHAIN="INPUT"
     local FILTER="$1"
-    
+    local FULL_OUTPUT
+
     # 전체 출력 저장
-    local FULL_OUTPUT=$(sudo iptables -nvL $CHAIN --line-numbers)
-    
+    FULL_OUTPUT=$(sudo iptables -nvL $CHAIN --line-numbers)
+
     # 헤더 출력 (첫 2줄)
     echo "$FULL_OUTPUT" | head -2
-    
+
     # 필터링된 내용 출력
     if [ -n "$FILTER" ]; then
         echo "$FULL_OUTPUT" | tail -n +3 | grep -E "$FILTER" || echo "  Docker 관련 규칙 없음"
@@ -132,7 +134,7 @@ case "$1" in
                 read -r response
                 if [[ ! "$response" =~ ^[yY]$ ]]; then
                     echo -e "${RED}취소되었습니다.${NC}"
-                    echo -e "${BLUE}💡 강제로 진행하려면 -f 옵션을 사용하세요: gcloud-docker-network add -f ${PORTS[@]}${NC}"
+                    echo -e "${BLUE}💡 강제로 진행하려면 -f 옵션을 사용하세요: gcloud-docker-network add -f ${PORTS[*]}${NC}"
                     exit 0
                 fi
             fi
